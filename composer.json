@@ -1,0 +1,34 @@
+{
+    "name": "wareon/laravel-zipkin",
+    "description": "Laravel zipkin for Laravel.",
+    "type": "library",
+    "keywords": ["laravel", "extension"],
+    "homepage": "https://github.com/wareon/laravel-zipkin",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "wareon",
+            "email": "wareon@qq.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "php": ">=7.0.0",
+        "openzipkin/zipkin": "^2.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^7.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Wareon\\Zipkin\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Wareon\\Zipkin\\ZipkinServiceProvider"
+            ]
+        }
+    }
+}
