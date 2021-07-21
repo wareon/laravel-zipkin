@@ -14,6 +14,7 @@ namespace Wareon\Zipkin;
 
 use Wareon\Zipkin\Reporter\RedisReporter;
 use Zipkin\Endpoint;
+use Zipkin\Propagation\TraceContext;
 use Zipkin\Reporters\Http;
 use Zipkin\Samplers\BinarySampler;
 use Zipkin\Span;
@@ -32,11 +33,6 @@ class Zipkin
      * @var Span|null
      */
     private $span = null;
-
-    /**
-     * @var Span|null
-     */
-    private $spanChild = null;
 
     /**
      * 初始化
@@ -62,34 +58,93 @@ class Zipkin
      * @return Tracer|null
      * @author wareon
      */
-    public function getTracer() {
+    public function getTracer()
+    {
         return $this->tracer;
     }
 
     /**
      * SPAN启动
      * @param $name
-     * @param array $tags
+     * @param array $parent
+     * @param array $options
      * @return Span|null
      * @author wareon
      */
-    public function spanStart($name, $tags = []) {
+    public function spanStart($name, $parent = [], $options = [])
+    {
         $tracer = $this->getTracer();
-        $this->span = $tracer->newTrace();
+        if (!empty($parent)) {
+            $context = TraceContext::create(
+                $parent['traceId'],
+                $parent['spanId'],
+                $parent['parentId'],
+                $parent['isSampled'],
+                $parent['isDebug'],
+                $parent['isShared'],
+                $parent['usesTraceId128bits']
+            );
+            $this->span = $tracer->newChild($context);
+        } else {
+            $this->span = $tracer->newTrace();
+        }
         $this->span->setName($name);
-        foreach ($tags as $tag)
-            $this->span->tag($tag['tag'], $tag['val']);
+        if(isset($options['tag'])){
+            $tag = $options['tag'];
+            foreach ($tags as $tag)
+                $this->span->tag($tag['tag'], $tag['val']);
+        }
+        if(isset($options['annotate'])){
+            $this->span->annotate($options['annotate']);
+        }
+
         $this->span->start();
-        return $this->span;
+        $context = $this->span->getContext();
+        if ($context->isEmpty()) {
+            return [];
+        } else {
+            return [
+                'traceId' => $context->getTraceId(),
+                'spanId' => $context->getSpanId(),
+                'parentId' => $context->getParentId(),
+                'isSampled' => $context->isSampled(),
+                'isDebug' => $context->isDebug(),
+                'isShared' => $context->isShared(),
+                'usesTraceId128bits' => $context->usesTraceId128bits(),
+            ];
+        }
+
     }
 
     /**
-     * 增加中间注释
+     * SPAN完成
+     * @author wareon
+     */
+    public function spanFinish()
+    {
+        if (!is_null($this->span))
+            $this->span->finish();
+    }
+
+    /**
+     * tags
+     * @param array $tags
+     * @author wareon
+     */
+    public function spanTags(array $tags)
+    {
+        foreach ($tags as $tag)
+            $this->span->tag($tag['tag'], $tag['val']);
+    }
+
+    /**
+     * SPAN增加注释
      * @param string $value
      * @param int|null $timestamp
      * @author wareon
      */
-    public function spanAnnotate(string $value, int $timestamp = null) {
+    public function spanAnnotate(string $value, int $timestamp = null)
+    {
         $this->span->annotate($value, $timestamp);
     }
 
@@ -97,53 +152,19 @@ class Zipkin
      * SPAN结束
      * @author wareon
      */
-    public function spanFinish() {
-        if(!is_null($this->span))
-        $this->span->finish();
-    }
-
-    /**
-     * 下级SPAN开始
-     * @param $name
-     * @param array $tags
-     * @return Span|null
-     * @author wareon
-     */
-    public function spanChildStart($name, $tags = []) {
-        $tracer = $this->getTracer();
-        $this->spanChild = $tracer->newChild($this->span->getContext());
-        $this->spanChild->setName($name);
-        foreach ($tags as $tag)
-            $this->span->tag($tag['tag'], $tag['val']);
-        $this->spanChild->start();
-        return $this->spanChild;
-    }
-
-    /**
-     * 下级SPAN中间注释
-     * @param string $value
-     * @param int|null $timestamp
-     * @author wareon
-     */
-    public function spanChildAnnotate(string $value, int $timestamp = null) {
-        $this->spanChild->annotate($value, $timestamp);
-    }
-
-    /**
-     * 下级SPAN结束
-     * @author wareon
-     */
-    public function spanChildFinish() {
-        if(!is_null($this->spanChild))
-            $this->spanChild->finish();
+    public function spanEnd()
+    {
+        $this->spanFinish();
+        $this->tracerFlush();
     }
 
     /**
      * tracer刷新
      * @author wareon
      */
-    public function tracerFlush() {
-        if(!is_null($this->tracer))
+    public function tracerFlush()
+    {
+        if (!is_null($this->tracer))
             $this->tracer->flush();
     }
 

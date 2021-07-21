@@ -17,6 +17,10 @@ class ZipkinServiceProvider extends ServiceProvider
         $this->mergeConfigFrom(
             __DIR__.'/config/zipkin.php', 'database.redis.zipkin'
         );
+        // Single Class
+        $this->app->singleton('Zipkin', function ($app) {
+            return new Zipkin();
+        });
         $this->registerCommands();
     }
 
@@ -42,5 +46,10 @@ class ZipkinServiceProvider extends ServiceProvider
                 Console\ConsumeZipkinLog::class,
             ]);
         }
+    }
+
+    public function provides()
+    {
+        return ['Zipkin'];
     }
 }

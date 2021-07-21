@@ -28,25 +28,15 @@ class ZipkinTest extends TestCase
 
     public function testStart()
     {
-        $name = 'encode' . date('ymdHis');
+        $name = 'parentId test' . date('ymdHis');
         $tags = [
             ['tag' => 'http.status_code', 'val' => '200']
         ];
         $annotate = 'finagle.retry';
-        $this->service->spanStart($name, $tags);
+        $context = $this->service->spanStart($name, [], $tags);
         $this->service->spanAnnotate($annotate);
         try {
             echo "doSomethingExpensive();";
-            $name = 'child encode' . date('ymdHis');
-            $tags = [];
-            $annotate = 'child finagle.retry';
-            $this->service->spanChildStart($name, $tags);
-            $this->service->spanChildAnnotate($annotate);
-            try {
-                echo "Child doSomethingExpensive();";
-            } finally {
-                $this->service->spanChildFinish();
-            }
         } finally {
             $this->service->spanFinish();
         }
@@ -56,17 +46,7 @@ class ZipkinTest extends TestCase
         $this->assertIsBool(true);
     }
 
-    public function testSpanChildStart()
-    {
-
-    }
-
     public function testSpanFinish()
-    {
-
-    }
-
-    public function testSpanAnnotate()
     {
 
     }
@@ -76,15 +56,6 @@ class ZipkinTest extends TestCase
 
     }
 
-    public function testSpanChildFinish()
-    {
-
-    }
-
-    public function testSpanChildAnnotate()
-    {
-
-    }
 
     public function testGetTracer()
     {

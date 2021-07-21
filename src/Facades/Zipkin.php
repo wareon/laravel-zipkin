@@ -12,12 +12,11 @@ use Illuminate\Support\Facades\Facade;
 
 /**
  * @method static getTracer()
- * @method static spanStart(string $name, array $tags)
+ * @method static spanStart(string $name, array $parent = [], array $options = [])
+ * @method static spanTags(array $tags)
  * @method static spanAnnotate(string $value, int $timestamp = null)
  * @method static spanFinish()
- * @method static spanChildStart(string $name, array $tags)
- * @method static spanChildAnnotate(string $value, int $timestamp = null)
- * @method static spanChildFinish()
+ * @method static spanEnd()
  * @method static tracerFlush()
  */
 
