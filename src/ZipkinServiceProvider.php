@@ -15,7 +15,7 @@ class ZipkinServiceProvider extends ServiceProvider
     {
         //
         $this->mergeConfigFrom(
-            __DIR__.'/config/zipkin.php', 'zipkin'
+            __DIR__.'/config/zipkin.php', 'database.redis.zipkin'
         );
         $this->registerCommands();
     }

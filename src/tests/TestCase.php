@@ -1,6 +1,6 @@
 <?php
 
-namespace Wareon\RakutenRms\Tests;
+namespace Wareon\Zipkin\Tests;
 
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 

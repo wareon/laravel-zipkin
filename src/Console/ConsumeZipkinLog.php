@@ -55,12 +55,22 @@ class ConsumeZipkinLog extends Command
         ];
         $clientFactory = CurlFactory::create();
         $client = $clientFactory->build($options);
-        $config = config('zipkin');
-        $key = $config['key'];
+        $config = config('database.redis.zipkin');
+        $key = $config['key'] ?? 'ZIPKIN:LOG';
+        $this->info('Starting consume log.');
         do {
             $json = Redis::connection('zipkin')->lpop($key);
-            if (!empty($json)) $client($json);
+            if (!empty($json)){
+                $client($json);
+                $array = json_decode($json, true);
+                if(is_array($array)) {
+                    foreach ($array as $item){
+                        $this->info("{$item['id']}\t\t{$item['traceId']}\t\t{$item['name']}");
+                    }
+                }
+            }
         } while (!empty($json));
+        $this->info('Consume log end.');
     }
 
 

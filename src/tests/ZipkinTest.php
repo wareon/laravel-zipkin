@@ -11,8 +11,50 @@
 namespace Wareon\Zipkin\Tests;
 
 
+use Wareon\Zipkin\Zipkin;
+
 class ZipkinTest extends TestCase
 {
+    /**
+     * @var ZipkinService|null
+     */
+    public $service = null;
+
+    public function setUp(): void
+    {
+        parent::setUp();
+        $this->service = new Zipkin();
+    }
+
+    public function testStart()
+    {
+        $name = 'encode' . date('ymdHis');
+        $tags = [
+            ['tag' => 'http.status_code', 'val' => '200']
+        ];
+        $annotate = 'finagle.retry';
+        $this->service->spanStart($name, $tags);
+        $this->service->spanAnnotate($annotate);
+        try {
+            echo "doSomethingExpensive();";
+            $name = 'child encode' . date('ymdHis');
+            $tags = [];
+            $annotate = 'child finagle.retry';
+            $this->service->spanChildStart($name, $tags);
+            $this->service->spanChildAnnotate($annotate);
+            try {
+                echo "Child doSomethingExpensive();";
+            } finally {
+                $this->service->spanChildFinish();
+            }
+        } finally {
+            $this->service->spanFinish();
+        }
+
+        $this->service->tracerFlush();
+
+        $this->assertIsBool(true);
+    }
 
     public function testSpanChildStart()
     {
