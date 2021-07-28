@@ -49,7 +49,7 @@ class ConsumeZipkinLog extends Command
      */
     public function handle()
     {
-        $url = config('zipkin.endpoint_url', 'http://localhost:9411/api/v2/spans');
+        $url = config('database.redis.zipkin.endpoint_url', 'http://localhost:9411/api/v2/spans');
         $options = [
             'endpoint_url' => $url,
         ];
