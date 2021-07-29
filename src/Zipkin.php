@@ -90,9 +90,10 @@ class Zipkin
         }
         $this->span->setName($name);
         if(isset($options['tag'])){
-            $tag = $options['tag'];
-            foreach ($tags as $tag)
+            $tags = $options['tag'];
+            foreach ($tags as $tag) {
                 $this->span->tag($tag['tag'], $tag['val']);
+            }
         }
         if(isset($options['annotate'])){
             $this->span->annotate($options['annotate']);
