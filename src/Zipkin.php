@@ -89,8 +89,8 @@ class Zipkin
             $this->span = $tracer->newTrace();
         }
         $this->span->setName($name);
-        if(isset($options['tag'])){
-            $tags = $options['tag'];
+        if(isset($options['tags'])){
+            $tags = $options['tags'];
             foreach ($tags as $tag) {
                 $this->span->tag($tag['tag'], $tag['val']);
             }
