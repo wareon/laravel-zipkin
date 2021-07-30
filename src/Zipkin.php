@@ -12,6 +12,7 @@
 namespace Wareon\Zipkin;
 
 
+use Illuminate\Support\Facades\Redis;
 use Wareon\Zipkin\Reporter\RedisReporter;
 use Zipkin\Endpoint;
 use Zipkin\Propagation\TraceContext;
@@ -35,6 +36,27 @@ class Zipkin
     private $span = null;
 
     /**
+     * @var 调用者ID
+     */
+    private $callerId = 0;
+
+    /**
+     * 最大调用者ID
+     * @var int
+     */
+    private $maxCallerId = 100000000;
+
+    /**
+     * @var string redis父级键名前缀
+     */
+    private $redisParentPrefix = 'ZIPKIN:PARENT:';
+
+    /**
+     * @var string redis调用者键名
+     */
+    private $redisCallerIdKey = 'ZIPKIN:CALLER_ID';
+
+    /**
      * 初始化
      * @param string $serviceName
      */
@@ -51,6 +73,71 @@ class Zipkin
             ->havingReporter($reporter)
             ->build();
         $this->tracer = $tracing->getTracer();
+    }
+
+    /**
+     * 设置调用者ID
+     * @param $callId
+     * @author wareon
+     */
+    public function setCallerId($callId)
+    {
+        $this->callerId = $callId;
+    }
+
+    /**
+     * 返回调用者ID
+     * @return 调用者ID
+     * @author wareon
+     */
+    public function getCallerId()
+    {
+        return $this->callerId;
+    }
+
+    /**
+     * 返回新调用者ID
+     * @return mixed
+     * @author wareon
+     */
+    public function newCallerId()
+    {
+        $callIdKey = config('database.redis.zipkin.caller_id_key', $this->redisCallerIdKey);
+        $callId = Redis::connection('zipkin')->incr($callIdKey);
+        // 重置调用者ID
+        if($callId > $this->maxCallerId) {
+            $callId = 1;
+            Redis::connection('zipkin')->set($callIdKey, $callId);
+        }
+        return $callId;
+    }
+
+    /**
+     * 设置父级
+     * @param $parent
+     * @author wareon
+     */
+    public function setParent($parent)
+    {
+        $redisParentPrefix = config('database.redis.zipkin.parent_prefix', $this->redisParentPrefix);
+        $callId = $this->getCallerId();
+        $redisParentKey = $redisParentPrefix . $callId;
+        $parent = json_encode($parent, JSON_UNESCAPED_UNICODE);
+        Redis::connection('zipkin')->set($redisParentKey, $parent);
+    }
+
+    /**
+     * 返回父级
+     * @return mixed
+     * @author wareon
+     */
+    public function getParent()
+    {
+        $redisParentPrefix = config('database.redis.zipkin.parent_prefix', $this->redisParentPrefix);
+        $callId = $this->getCallerId();
+        $redisParentKey = $redisParentPrefix . $callId;
+        $parent = Redis::connection('zipkin')->get($redisParentKey);
+        return json_decode($parent, true);
     }
 
     /**

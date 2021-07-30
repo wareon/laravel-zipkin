@@ -62,6 +62,20 @@ class ZipkinTest extends TestCase
 
     }
 
+    public function testGetCallerId()
+    {
+        $callerId = $this->service->getCallerId();
+        echo $callerId;
+        $this->assertIsBool(true);
+    }
+
+    public function testGetCallerId()
+    {
+        $callerId = $this->service->getCallerId();
+        echo $callerId;
+        $this->assertIsBool(true);
+    }
+
     public function testTracerFlush()
     {
 

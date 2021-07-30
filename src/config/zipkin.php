@@ -24,6 +24,8 @@ return [
     'database' => env('ZIPKIN_REDIS_DB', '0'),
 
     'key' => env('ZIPKIN_REDIS_KEY', null),
+    'parent_prefix' => env('ZIPKIN_REDIS_PARENT_PREFIX', null),
+    'caller_id_key' => env('ZIPKIN_REDIS_CALLER_ID_KEY', null),
     'endpoint_url' => env('ZIPKIN_ENDPOINT_URL', 'http://localhost:9411/api/v2/spans')
 
 ];

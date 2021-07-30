@@ -11,6 +11,7 @@ namespace Wareon\Zipkin\Facades;
 use Illuminate\Support\Facades\Facade;
 
 /**
+ * @method static getCallerId()
  * @method static getTracer()
  * @method static spanStart(string $name, array $parent = [], array $options = [])
  * @method static spanTags(array $tags)
