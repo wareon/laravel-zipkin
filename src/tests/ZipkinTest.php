@@ -69,9 +69,9 @@ class ZipkinTest extends TestCase
         $this->assertIsBool(true);
     }
 
-    public function testGetCallerId()
+    public function testNewCallerId()
     {
-        $callerId = $this->service->getCallerId();
+        $callerId = $this->service->newCallerId();
         echo $callerId;
         $this->assertIsBool(true);
     }

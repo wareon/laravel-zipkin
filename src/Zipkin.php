@@ -41,6 +41,11 @@ class Zipkin
     private $callerId = 0;
 
     /**
+     * @var 上级缓存时间
+     */
+    private $parentTimeout = 600;
+
+    /**
      * 最大调用者ID
      * @var int
      */
@@ -92,7 +97,12 @@ class Zipkin
      */
     public function getCallerId()
     {
-        return $this->callerId;
+        $callId = $this->callerId;
+        if(empty($callId)) {
+            $callIdKey = config('database.redis.zipkin.caller_id_key', $this->redisCallerIdKey);
+            $callId = Redis::connection('zipkin')->get($callIdKey);
+        }
+        return $callId;
     }
 
     /**
@@ -109,21 +119,28 @@ class Zipkin
             $callId = 1;
             Redis::connection('zipkin')->set($callIdKey, $callId);
         }
+        $this->callerId = $callId;
         return $callId;
     }
 
     /**
      * 设置父级
      * @param $parent
+     * @param bool $isNew
      * @author wareon
      */
-    public function setParent($parent)
+    public function setParent($parent, $isNew = false)
     {
         $redisParentPrefix = config('database.redis.zipkin.parent_prefix', $this->redisParentPrefix);
-        $callId = $this->getCallerId();
+        if($isNew) {
+            $callId = $this->newCallerId();
+        } else {
+            $callId = $this->getCallerId();
+        }
         $redisParentKey = $redisParentPrefix . $callId;
         $parent = json_encode($parent, JSON_UNESCAPED_UNICODE);
         Redis::connection('zipkin')->set($redisParentKey, $parent);
+        Redis::connection('zipkin')->expire($redisParentKey, $this->parentTimeout);
     }
 
     /**
