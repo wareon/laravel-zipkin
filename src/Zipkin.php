@@ -43,7 +43,7 @@ class Zipkin
     /**
      * @var 上级缓存时间
      */
-    private $parentTimeout = 600;
+    private $parentTimeout = 60;
 
     /**
      * 最大调用者ID
