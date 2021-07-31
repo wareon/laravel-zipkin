@@ -269,6 +269,7 @@ class Zipkin
      */
     public function tracerFlush()
     {
+        $this->callerId = 0;
         if (!is_null($this->tracer))
             $this->tracer->flush();
     }
