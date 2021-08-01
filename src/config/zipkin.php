@@ -23,6 +23,7 @@ return [
     'port' => env('ZIPKIN_REDIS_PORT', '6379'),
     'database' => env('ZIPKIN_REDIS_DB', '0'),
 
+    'enable' => env('ZIPKIN_ENABLE', false),
     'key' => env('ZIPKIN_REDIS_KEY', null),
     'parent_prefix' => env('ZIPKIN_REDIS_PARENT_PREFIX', null),
     'caller_id_key' => env('ZIPKIN_REDIS_CALLER_ID_KEY', null),

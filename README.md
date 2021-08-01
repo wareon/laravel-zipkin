@@ -5,6 +5,7 @@
 # .env config
 
 ```
+ZIPKIN_ENABLE=true
 ZIPKIN_ENDPOINT_URL=http://localhost:9411/api/v2/spans
 ZIPKIN_REDIS_PREFIX=
 ZIPKIN_REDIS_KEY=ZIPKIN:LOG

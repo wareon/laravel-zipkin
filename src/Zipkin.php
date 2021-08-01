@@ -25,6 +25,11 @@ use Zipkin\TracingBuilder;
 
 class Zipkin
 {
+    /**
+     * @var bool 是否开启
+     */
+    private $enable = false;
+
     public $serviceName = '';
     /**
      * @var Tracer|null
@@ -57,6 +62,8 @@ class Zipkin
      */
     public function __construct($serviceName = '')
     {
+        $this->enable = config('database.redis.zipkin.enable');
+        if(!$this->enable) return;
         $this->serviceName = empty($serviceName) ? config('app.name') : $serviceName;
         // First we create the endpoint that describes our service
         $endpoint = Endpoint::create($this->serviceName);
@@ -98,6 +105,7 @@ class Zipkin
      */
     public function setParent($parent, $callerId = '')
     {
+        if(!$this->enable) return;
         $redisParentPrefix = config('database.redis.zipkin.parent_prefix', $this->redisParentPrefix);
         if(empty($callerId)) $callerId = $this->getCallerId();
         if(!empty($callerId)) {
@@ -115,6 +123,7 @@ class Zipkin
      */
     public function getParent($callerId = '')
     {
+        if(!$this->enable) return [];
         $redisParentPrefix = config('database.redis.zipkin.parent_prefix', $this->redisParentPrefix);
         if(empty($callerId)) $callerId = $this->getCallerId();
         if(empty($callerId)) return [];
@@ -143,6 +152,7 @@ class Zipkin
      */
     public function spanStart($name, $parent = [], $options = [])
     {
+        if(!$this->enable) return [];
         $tracer = $this->getTracer();
         if (!empty($parent)) {
             $context = TraceContext::create(
@@ -204,6 +214,7 @@ class Zipkin
      */
     public function spanTags(array $tags)
     {
+        if(!$this->enable) return;
         foreach ($tags as $tag)
             $this->span->tag($tag['tag'], $tag['val']);
     }
@@ -216,6 +227,7 @@ class Zipkin
      */
     public function spanAnnotate(string $value, int $timestamp = null)
     {
+        if(!$this->enable) return;
         $this->span->annotate($value, $timestamp);
     }
 
