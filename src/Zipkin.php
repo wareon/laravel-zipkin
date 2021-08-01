@@ -15,6 +15,7 @@ namespace Wareon\Zipkin;
 use Illuminate\Support\Facades\Redis;
 use Wareon\Zipkin\Reporter\RedisReporter;
 use Zipkin\Endpoint;
+use Zipkin\Propagation\SamplingFlags;
 use Zipkin\Propagation\TraceContext;
 use Zipkin\Reporters\Http;
 use Zipkin\Samplers\BinarySampler;
@@ -38,7 +39,7 @@ class Zipkin
     /**
      * @var 调用者ID
      */
-    private $callerId = 0;
+    private $callerId = '';
 
     /**
      * @var 上级缓存时间
@@ -46,20 +47,9 @@ class Zipkin
     private $parentTimeout = 60;
 
     /**
-     * 最大调用者ID
-     * @var int
-     */
-    private $maxCallerId = 100000000;
-
-    /**
      * @var string redis父级键名前缀
      */
     private $redisParentPrefix = 'ZIPKIN:PARENT:';
-
-    /**
-     * @var string redis调用者键名
-     */
-    private $redisCallerIdKey = 'ZIPKIN:CALLER_ID';
 
     /**
      * 初始化
@@ -97,50 +87,25 @@ class Zipkin
      */
     public function getCallerId()
     {
-        $callId = $this->callerId;
-        if(empty($callId)) {
-            $callIdKey = config('database.redis.zipkin.caller_id_key', $this->redisCallerIdKey);
-            $callId = Redis::connection('zipkin')->get($callIdKey);
-        }
-        return $callId;
-    }
-
-    /**
-     * 返回新调用者ID
-     * @return mixed
-     * @author wareon
-     */
-    public function newCallerId()
-    {
-        $callIdKey = config('database.redis.zipkin.caller_id_key', $this->redisCallerIdKey);
-        $callId = Redis::connection('zipkin')->incr($callIdKey);
-        // 重置调用者ID
-        if($callId > $this->maxCallerId) {
-            $callId = 1;
-            Redis::connection('zipkin')->set($callIdKey, $callId);
-        }
-        $this->callerId = $callId;
-        return $callId;
+        return $this->callerId;
     }
 
     /**
      * 设置父级
      * @param $parent
-     * @param bool $isNew
+     * @param $callerId
      * @author wareon
      */
-    public function setParent($parent, $isNew = false)
+    public function setParent($parent, $callerId = '')
     {
         $redisParentPrefix = config('database.redis.zipkin.parent_prefix', $this->redisParentPrefix);
-        if($isNew) {
-            $callId = $this->newCallerId();
-        } else {
-            $callId = $this->getCallerId();
+        if(empty($callerId)) $callerId = $this->getCallerId();
+        if(!empty($callerId)) {
+            $redisParentKey = $redisParentPrefix . $callerId;
+            $parent = json_encode($parent, JSON_UNESCAPED_UNICODE);
+            Redis::connection('zipkin')->set($redisParentKey, $parent);
+            Redis::connection('zipkin')->expire($redisParentKey, $this->parentTimeout);
         }
-        $redisParentKey = $redisParentPrefix . $callId;
-        $parent = json_encode($parent, JSON_UNESCAPED_UNICODE);
-        Redis::connection('zipkin')->set($redisParentKey, $parent);
-        Redis::connection('zipkin')->expire($redisParentKey, $this->parentTimeout);
     }
 
     /**
@@ -148,11 +113,12 @@ class Zipkin
      * @return mixed
      * @author wareon
      */
-    public function getParent()
+    public function getParent($callerId = '')
     {
         $redisParentPrefix = config('database.redis.zipkin.parent_prefix', $this->redisParentPrefix);
-        $callId = $this->getCallerId();
-        $redisParentKey = $redisParentPrefix . $callId;
+        if(empty($callerId)) $callerId = $this->getCallerId();
+        if(empty($callerId)) return [];
+        $redisParentKey = $redisParentPrefix . $callerId;
         $parent = Redis::connection('zipkin')->get($redisParentKey);
         return json_decode($parent, true);
     }
@@ -182,11 +148,11 @@ class Zipkin
             $context = TraceContext::create(
                 $parent['traceId'],
                 $parent['spanId'],
-                $parent['parentId'],
-                $parent['isSampled'],
-                $parent['isDebug'],
-                $parent['isShared'],
-                $parent['usesTraceId128bits']
+                $parent['parentId'] ?? null,
+                $parent['isSampled'] ?? SamplingFlags::EMPTY_SAMPLED,
+                $parent['isDebug'] ?? SamplingFlags::EMPTY_DEBUG,
+                $parent['isShared'] ?? false,
+                $parent['usesTraceId128bits'] ?? false
             );
             $this->span = $tracer->newChild($context);
         } else {
@@ -269,7 +235,7 @@ class Zipkin
      */
     public function tracerFlush()
     {
-        $this->callerId = 0;
+        $this->callerId = '';
         if (!is_null($this->tracer))
             $this->tracer->flush();
     }

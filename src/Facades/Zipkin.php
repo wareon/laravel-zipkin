@@ -13,10 +13,9 @@ use Illuminate\Support\Facades\Facade;
 /**
  * @method static getCallerId()
  * @method static setCallerId($callId)
- * @method static newCallerId()
  * @method static getTracer()
- * @method static setParent($parent, bool $isNew = false)
- * @method static getParent()
+ * @method static setParent($parent, $callerId = '')
+ * @method static getParent($callerId = '')
  * @method static spanStart(string $name, array $parent = [], array $options = [])
  * @method static spanTags(array $tags)
  * @method static spanAnnotate(string $value, int $timestamp = null)

@@ -65,7 +65,8 @@ class ConsumeZipkinLog extends Command
                 $array = json_decode($json, true);
                 if(is_array($array)) {
                     foreach ($array as $item){
-                        $this->info("{$item['id']}\t\t{$item['traceId']}\t\t{$item['name']}");
+                        $parentId = $item['parentId'] ?? '----------------';
+                        $this->info("{$item['id']}\t\t{$item['traceId']}\t\t{$parentId}\t\t{$item['name']}");
                     }
                 }
             }
