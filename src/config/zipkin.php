@@ -10,7 +10,6 @@
 
 return [
     'enable' => env('ZIPKIN_ENABLE', false),
-    'key' => env('ZIPKIN_REDIS_KEY', null),
     'parent_prefix' => env('ZIPKIN_REDIS_PARENT_PREFIX', null),
     'endpoint_url' => env('ZIPKIN_ENDPOINT_URL', 'http://localhost:9411/api/v2/spans'),
 

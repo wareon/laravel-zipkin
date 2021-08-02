@@ -14,8 +14,8 @@ use Wareon\Zipkin\Facades\Zipkin;
 
 class BaseClient
 {
-    protected $host = '';
-    protected $port = '';
+    public $host = '';
+    public $port = '';
     protected $rpcClient = null;
     protected static $client = null;
     public static $callerId = '';
