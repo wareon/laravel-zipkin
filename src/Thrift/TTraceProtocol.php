@@ -10,7 +10,6 @@
 
 namespace Wareon\Zipkin\Thrift;
 
-use App\Helpers\Tools;
 use Thrift\Protocol\TBinaryProtocol;
 
 class TTraceProtocol extends TBinaryProtocol
@@ -28,7 +27,6 @@ class TTraceProtocol extends TBinaryProtocol
     {
         if (!empty($this->traceInfo)){
             $name = $this->traceInfo . self::SEPARATOR . $name;// 重命名原方法名
-            Tools::logInfo($this->traceInfo, 'TTraceProtocol writeMessageBegin '.$name);
         }
         return parent::writeMessageBegin($name, $type, $seqid);
     }
@@ -40,7 +38,6 @@ class TTraceProtocol extends TBinaryProtocol
         if ($pos !== false) {
             $this->traceInfo = substr($name, 0, $pos);// 读取trace信息
             $name = substr($name, $pos + 1);// 恢复原方法名
-            Tools::logInfo($this->traceInfo, 'TTraceProtocol readMessageBegin '.$name);
         }
         return $result;
     }
