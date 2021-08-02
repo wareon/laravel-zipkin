@@ -1,8 +1,8 @@
 <?php
 /**
  * 把链路跟踪信息先写入REDIS
- * @category   wms_logging
- * @author     wareon  <wenyongliang@speedtrade.net>
+ * @category   laravel-zipkin
+ * @author     wareon  <wareon@qq.com>
  * @license    project
  * @link       http://www.speedtrade.net
  * @ctime:     2021/7/21 10:50

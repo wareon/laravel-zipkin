@@ -1,16 +1,14 @@
 <?php
 /**
  * Zipkin 服务类
- * @category   wms_logging
- * @author     wareon  <wenyongliang@speedtrade.net>
+ * @category   laravel-zipkin
+ * @author     wareon  <wareon@qq.com>
  * @license    project
  * @link       http://www.speedtrade.net
  * @ctime:     2021/7/17 18:02
  */
 
-
 namespace Wareon\Zipkin;
-
 
 use Illuminate\Support\Facades\Redis;
 use Wareon\Zipkin\Reporter\RedisReporter;
@@ -62,7 +60,7 @@ class Zipkin
      */
     public function __construct($serviceName = '')
     {
-        $this->enable = config('database.redis.zipkin.enable');
+        $this->enable = config('zipkin.enable');
         if(!$this->enable) return;
         $this->serviceName = empty($serviceName) ? config('app.name') : $serviceName;
         // First we create the endpoint that describes our service
@@ -106,7 +104,7 @@ class Zipkin
     public function setParent($parent, $callerId = '')
     {
         if(!$this->enable) return;
-        $redisParentPrefix = config('database.redis.zipkin.parent_prefix', $this->redisParentPrefix);
+        $redisParentPrefix = config('zipkin.parent_prefix', $this->redisParentPrefix);
         if(empty($callerId)) $callerId = $this->getCallerId();
         if(!empty($callerId)) {
             $redisParentKey = $redisParentPrefix . $callerId;
@@ -124,7 +122,7 @@ class Zipkin
     public function getParent($callerId = '')
     {
         if(!$this->enable) return [];
-        $redisParentPrefix = config('database.redis.zipkin.parent_prefix', $this->redisParentPrefix);
+        $redisParentPrefix = config('zipkin.parent_prefix', $this->redisParentPrefix);
         if(empty($callerId)) $callerId = $this->getCallerId();
         if(empty($callerId)) return [];
         $redisParentKey = $redisParentPrefix . $callerId;
@@ -140,6 +138,47 @@ class Zipkin
     public function getTracer()
     {
         return $this->tracer;
+    }
+
+    /**
+     * 入口
+     * @param $name
+     * @param $client
+     * @author wareon
+     */
+    public function entry($name, $client)
+    {
+        $span = $this->spanStart($name);
+        $callerId = $span['spanId'] ?? '';
+        $client::$callerId = $callerId;
+        $this->setCallerId($callerId);
+        $this->setParent($span);
+    }
+
+    /**
+     * 客户端开始
+     * @param $name
+     * @param $callerId
+     * @param $client
+     * @return string
+     * @author wareon
+     */
+    public function clientStart($name, $client)
+    {
+        // 读取上级span
+        $this->setCallerId($client::$callerId);
+        $parent =  $this->getParent();
+        // 开始新span
+        $appName = config('app.name');
+        $span = $this->spanStart($appName . ':' . $name, $parent);
+        $newCallerId = $span['spanId'] ?? '';
+        $tags = [
+            ['tag' => 'Client', 'val' => $client]
+        ];
+        $this->spanTags($tags);
+        // 保存父级span到缓存
+        $this->setParent($span, $newCallerId);
+        return $newCallerId;
     }
 
     /**

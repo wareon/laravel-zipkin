@@ -1,16 +1,14 @@
 <?php
 /**
  * 把缓存到REDIS中的zipkin日志消费到zipkin server
- * @category   wms_logging
- * @author     wareon  <wenyongliang@speedtrade.net>
+ * @category   laravel-zipkin
+ * @author     wareon  <wareon@qq.com>
  * @license    project
  * @link       http://www.speedtrade.net
  * @ctime:     2021/7/21 11:46
  */
 
-
 namespace Wareon\Zipkin\Console;
-
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Redis;
@@ -49,13 +47,13 @@ class ConsumeZipkinLog extends Command
      */
     public function handle()
     {
-        $url = config('database.redis.zipkin.endpoint_url', 'http://localhost:9411/api/v2/spans');
+        $config = config('zipkin');
+        $url = config('zipkin.endpoint_url', 'http://localhost:9411/api/v2/spans');
         $options = [
             'endpoint_url' => $url,
         ];
         $clientFactory = CurlFactory::create();
         $client = $clientFactory->build($options);
-        $config = config('database.redis.zipkin');
         $key = $config['key'] ?? 'ZIPKIN:LOG';
         $this->info('Starting consume log.');
         do {

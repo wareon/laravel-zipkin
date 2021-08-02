@@ -2,7 +2,7 @@
 /**
  * Description
  * @category   laravel-zipkin
- * @author     wareon  <wenyongliang@speedtrade.net>
+ * @author     wareon  <wareon@qq.com>
  * @license    project
  * @link       http://www.speedtrade.net
  * @ctime:     2021/7/21 15:50
@@ -65,13 +65,6 @@ class ZipkinTest extends TestCase
     public function testGetCallerId()
     {
         $callerId = $this->service->getCallerId();
-        echo $callerId;
-        $this->assertIsBool(true);
-    }
-
-    public function testNewCallerId()
-    {
-        $callerId = $this->service->newCallerId();
         echo $callerId;
         $this->assertIsBool(true);
     }

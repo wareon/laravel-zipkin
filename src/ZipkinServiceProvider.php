@@ -13,9 +13,9 @@ class ZipkinServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        //
+        // 加载配置项到redis
         $this->mergeConfigFrom(
-            __DIR__.'/config/zipkin.php', 'database.redis.zipkin'
+            __DIR__.'/config/zipkin_redis.php', 'database.redis.zipkin'
         );
         // Single Class
         $this->app->singleton('Zipkin', function ($app) {
@@ -31,7 +31,9 @@ class ZipkinServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        //
+        $this->publishes([
+            __DIR__ . '/config/zipkin.php' => config_path('zipkin.php'), // publish to laravel config dir
+        ]);
     }
 
     /**
@@ -44,6 +46,7 @@ class ZipkinServiceProvider extends ServiceProvider
         if ($this->app->runningInConsole()) {
             $this->commands([
                 Console\ConsumeZipkinLog::class,
+                Console\RpcServerStart::class,
             ]);
         }
     }

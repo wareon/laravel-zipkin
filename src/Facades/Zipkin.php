@@ -11,6 +11,8 @@ namespace Wareon\Zipkin\Facades;
 use Illuminate\Support\Facades\Facade;
 
 /**
+ * @method static entry($name, $client)
+ * @method static clientStart($name, $client)
  * @method static getCallerId()
  * @method static setCallerId($callId)
  * @method static getTracer()
