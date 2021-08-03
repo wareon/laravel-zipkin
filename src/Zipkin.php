@@ -158,7 +158,6 @@ class Zipkin
     /**
      * 客户端开始
      * @param $name
-     * @param $callerId
      * @param $client
      * @return string
      * @author wareon
@@ -172,10 +171,10 @@ class Zipkin
         $appName = config('app.name');
         $span = $this->spanStart($appName . ':' . $name, $parent);
         $newCallerId = $span['spanId'] ?? '';
-        $tags = [
-            ['tag' => 'Client', 'val' => $client]
-        ];
-        $this->spanTags($tags);
+        // $tags = [
+        //     ['tag' => 'Client', 'val' => $client]
+        // ];
+        // $this->spanTags($tags);
         // 保存父级span到缓存
         $this->setParent($span, $newCallerId);
         return $newCallerId;

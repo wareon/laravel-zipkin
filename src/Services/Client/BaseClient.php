@@ -22,7 +22,14 @@ class BaseClient
 
     public function __call($name, $arguments)
     {
-        $newCallerId = Zipkin::clientStart($name,static::class);
+        $class = get_called_class();
+        $spanName = "{$class}::$name";
+
+        $newCallerId = Zipkin::clientStart($spanName,static::class);
+        Zipkin::spanTags([
+            ['tag' => 'params',"val" => json_encode($arguments[0])]
+        ]);
+
         try {
             $timeout = config('zipkin.rpc_timeout', 10000);
             $socket = new BaseTSocket($this->host, $this->port);
@@ -45,6 +52,7 @@ class BaseClient
             $recv = call_user_func_array([$client, $name], $arguments);
 
             $transport->close();
+            Zipkin::spanTags([['tag' => 'result',"val" => $recv]]);
             Zipkin::spanEnd();// 缓存当前span
             return json_decode($recv, true);
         } catch (\Exception $e) {
