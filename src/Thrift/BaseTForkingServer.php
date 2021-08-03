@@ -53,12 +53,12 @@ class BaseTForkingServer extends TForkingServer
                     }
                 }
             } catch (TTransportException $e) {
-                $date = date("Y-m-d H:i:s");
-                $mtime = microtime(true);
-                echo "[{$date} - {$mtime}] TTransportException: \n";
-                //echo $e->getMessage();
-                //echo $e->getTraceAsString();
-                echo "End exit \n";
+                // $date = date("Y-m-d H:i:s");
+                // $mtime = microtime(true);
+                // echo "[{$date} - {$mtime}] TTransportException: \n";
+                // //echo $e->getMessage();
+                // //echo $e->getTraceAsString();
+                // echo "End exit \n";
             }
 
             $this->collectChildren();
