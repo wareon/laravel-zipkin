@@ -57,15 +57,19 @@ class BaseClient
             return json_decode($recv, true);
         } catch (\Exception $e) {
             $msg = mb_convert_encoding($e->getMessage(), "UTF-8", "GB2312");
-            Zipkin::spanAnnotate($msg);
-            Zipkin::spanEnd();
-            return [
+            $result = [
                 'status' => 'error',
                 'status_code' => 500,
                 'error' => 1,
                 'code' => 500,
                 'message' => 'Exception: ' . $msg
             ];
+
+            Zipkin::spanTags([['tag' => 'result',"val" => json_encode($result, JSON_UNESCAPED_UNICODE)]]);
+            Zipkin::spanAnnotate($msg);
+            Zipkin::spanEnd();
+
+            return $result;
         }
     }
 
