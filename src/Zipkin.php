@@ -168,8 +168,9 @@ class Zipkin
         $this->setCallerId($client::$callerId);
         $parent =  $this->getParent();
         // 开始新span
-        $appName = config('app.name');
-        $span = $this->spanStart($appName . ':' . $name, $parent);
+        // $appName = config('app.name');
+        // $span = $this->spanStart($appName . ':' . $name, $parent);
+        $span = $this->spanStart($name, $parent);
         $newCallerId = $span['spanId'] ?? '';
         // $tags = [
         //     ['tag' => 'Client', 'val' => $client]

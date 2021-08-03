@@ -23,7 +23,7 @@ class BaseClient
     public function __call($name, $arguments)
     {
         $class = get_called_class();
-        $spanName = "{$class}::$name";
+        $spanName = "{$class}::{$name}";
 
         $newCallerId = Zipkin::clientStart($spanName,static::class);
         Zipkin::spanTags([
