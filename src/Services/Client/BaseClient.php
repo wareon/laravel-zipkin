@@ -27,7 +27,7 @@ class BaseClient
 
         $newCallerId = Zipkin::clientStart($spanName,static::class);
         Zipkin::spanTags([
-            ['tag' => 'params',"val" => json_encode($arguments[0], 384)]
+            ['tag' => 'params',"val" => json_encode($arguments[0] ?? "{}", 384)]
         ]);
 
         try {
