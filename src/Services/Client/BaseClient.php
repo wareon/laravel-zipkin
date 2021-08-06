@@ -27,7 +27,7 @@ class BaseClient
 
         $newCallerId = Zipkin::clientStart($spanName,static::class);
         Zipkin::spanTags([
-            ['tag' => 'params',"val" => json_encode($arguments[0])]
+            ['tag' => 'params',"val" => json_encode($arguments[0], 384)]
         ]);
 
         try {
@@ -50,11 +50,11 @@ class BaseClient
             }
             // 同步方式进行交互
             $recv = call_user_func_array([$client, $name], $arguments);
-
+            $recv = json_decode($recv, true);
             $transport->close();
-            Zipkin::spanTags([['tag' => 'result',"val" => $recv]]);
+            Zipkin::spanTags([['tag' => 'result',"val" => json_encode($recv, 384)]]);
             Zipkin::spanEnd();// 缓存当前span
-            return json_decode($recv, true);
+            return $recv;
         } catch (\Exception $e) {
             $msg = mb_convert_encoding($e->getMessage(), "UTF-8", "GB2312");
             $result = [
@@ -65,8 +65,8 @@ class BaseClient
                 'message' => 'Exception: ' . $msg
             ];
 
-            Zipkin::spanTags([['tag' => 'result',"val" => json_encode($result, JSON_UNESCAPED_UNICODE)]]);
-            Zipkin::spanAnnotate($msg);
+            Zipkin::spanTags([['tag' => 'result',"val" => json_encode($result, 384)]]);
+            Zipkin::spanAnnotate("MicroServiceException:{$msg}");
             Zipkin::spanEnd();
 
             return $result;
