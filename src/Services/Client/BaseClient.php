@@ -32,7 +32,7 @@ class BaseClient
 
         try {
             $timeout = config('zipkin.rpc_timeout', 10000);
-            $socket = new BaseTSocket($this->host, $this->port);
+            $socket = new TSocket($this->host, $this->port);
             $socket->setRecvTimeout($timeout);
             $socket->setSendTimeout($timeout);
             $transport = new TBufferedTransport($socket);
