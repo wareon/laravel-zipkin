@@ -84,50 +84,50 @@ class BaseTSocket extends TSocket
         //echo " Write end:  step {$step} buf {$len} \n\n";
     }
 
-    // public function read($len)
-    // {
-    //     $null = null;
-    //     $read = array($this->handle_);
-    //     $readable = @stream_select(
-    //         $read,
-    //         $null,
-    //         $null,
-    //         $this->recvTimeoutSec_,
-    //         $this->recvTimeoutUsec_
-    //     );
-    //     $do = $maxRead = floor($len / $this->packSize);
-    //     if ($readable > 0) {
-    //         $dataAll = '';
-    //         while ($len > 0 && $do >= 0) {
-    //             if ($do == 0) {
-    //                 $size = $len % $this->packSize;
-    //                 if(!$size)
-    //                     break;
-    //             } else {
-    //                 $size = $this->packSize;
-    //             }
-    //
-    //             $data = fread($this->handle_, $size);
-    //             if ($data === false) {
-    //                 throw new TTransportException('TSocket: Could not read ' . $len . ' bytes from ' .
-    //                     $this->host_ . ':' . $this->port_);
-    //             } elseif ($data == '' && feof($this->handle_)) {
-    //                 throw new TTransportException('TSocket read 0 bytes');
-    //             }
-    //             $dataAll .= $data;
-    //             $do--;
-    //         }
-    //
-    //         return $dataAll;
-    //     } elseif ($readable === 0) {
-    //         throw new TTransportException('TSocket: timed out reading ' . $do . '~' . $len . ' bytes from ' .
-    //             $this->host_ . ':' . $this->port_);
-    //     } else {
-    //         throw new TTransportException('TSocket: Could not read ' . $len . ' bytes from ' .
-    //             $this->host_ . ':' . $this->port_);
-    //     }
-    // }
-    //
+    public function read($len)
+    {
+        $null = null;
+        $read = array($this->handle_);
+        $readable = @stream_select(
+            $read,
+            $null,
+            $null,
+            $this->recvTimeoutSec_,
+            $this->recvTimeoutUsec_
+        );
+
+        $do = $maxRead = floor($len / $this->readSize);
+        if ($readable > 0) {
+            $dataAll = '';
+            while ($len > 0 && $do >= 0) {
+                if ($do == 0) {
+                    $size = $len % $this->readSize;
+                    if($size == 0) // 没有余数
+                        break;
+                } else {
+                    $size = $this->readSize;
+                }
+
+                $data = fread($this->handle_, $size);
+                if ($data === false) {
+                    throw new TTransportException('TSocket: Could not read ' . $len . ' bytes from ' .
+                        $this->host_ . ':' . $this->port_);
+                } elseif ($data == '' && feof($this->handle_)) {
+                    throw new TTransportException('TSocket read 0 bytes');
+                }
+                $dataAll .= $data;
+                $do--;
+            }
+
+            return $dataAll;
+        } elseif ($readable === 0) {
+            throw new TTransportException('TSocket: timed out reading ' . $do . '~' . $len . ' bytes from ' .
+                $this->host_ . ':' . $this->port_);
+        } else {
+            throw new TTransportException('TSocket: Could not read ' . $len . ' bytes from ' .
+                $this->host_ . ':' . $this->port_);
+        }
+    }
     // public function getHandle(){
     //     return $this->handle_;
     // }
