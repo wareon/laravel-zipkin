@@ -16,7 +16,7 @@ use Thrift\Transport\TSocket;
 
 class BaseTSocket extends TSocket
 {
-    private $packSize = 815559; // 用1/10大小， 块大小最大815559 + intval(815559 / 10 * 8)
+    private $packSize = 14680; // 815559; // 用1/10大小， 块大小最大815559 + intval(815559 / 10 * 8)
 
     public function __construct(
         $host = 'localhost',
@@ -96,7 +96,7 @@ class BaseTSocket extends TSocket
             $this->recvTimeoutUsec_
         );
         $do = $maxRead = floor($len / $this->packSize);
-        if ($readable >= 0) {
+        if ($readable > 0) {
             $dataAll = '';
             while ($len > 0 && $do >= 0) {
                 if ($do == 0) {
