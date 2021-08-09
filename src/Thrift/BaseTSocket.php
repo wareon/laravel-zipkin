@@ -101,6 +101,8 @@ class BaseTSocket extends TSocket
             while ($len > 0 && $do >= 0) {
                 if ($do == 0) {
                     $size = $len % $this->packSize;
+                    if(!$size)
+                        break;
                 } else {
                     $size = $this->packSize;
                 }
