@@ -17,7 +17,7 @@ use Thrift\Transport\TSocket;
 class BaseTSocket extends TSocket
 {
     private $packSize = 14680; // 815559; // 用1/10大小， 块大小最大815559 + intval(815559 / 10 * 8)
-    private $readSize = 1024;
+    private $readSize = 10240;
 
     public function __construct(
         $host = 'localhost',
