@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Wareon\Zipkin;
 
-use Zipkin\Reporters\Http\RuntimeException;
-use Zipkin\Reporters\Http\BadFunctionCallException;
+use RuntimeException;
+use BadFunctionCallException;
 use Zipkin\Reporters\Http\ClientFactory;
 
 final class CurlFactory implements ClientFactory
