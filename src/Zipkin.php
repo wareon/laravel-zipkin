@@ -58,13 +58,20 @@ class Zipkin
      * 初始化
      * @param string $serviceName
      */
-    public function __construct($serviceName = '')
+    public function __construct(
+        $serviceName = '',
+        ?string $ipv4 = null,
+        ?string $ipv6 = null,
+        ?int $port = null
+    )
     {
         $this->enable = config('zipkin.enable');
         if(!$this->enable) return;
         $this->serviceName = empty($serviceName) ? config('app.name') : $serviceName;
         // First we create the endpoint that describes our service
-        $endpoint = Endpoint::create($this->serviceName);
+        if(empty($ipv4)) $ipv4 = config('zipkin.rpc_host');
+        if(empty($port)) $port = config('zipkin.rpc_port');
+        $endpoint = Endpoint::create($this->serviceName, $ipv4, $ipv6, $port);
         $reporter = new RedisReporter();
         $sampler = BinarySampler::createAsAlwaysSample();
         $tracing = TracingBuilder::create()
