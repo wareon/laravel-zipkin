@@ -12,7 +12,7 @@ namespace Wareon\Zipkin\Console;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Redis;
-use Zipkin\Reporters\Http\CurlFactory;
+use Wareon\Zipkin\CurlFactory;
 
 class ConsumeZipkinLog extends Command
 {
@@ -59,7 +59,12 @@ class ConsumeZipkinLog extends Command
         do {
             $json = Redis::connection('zipkin')->lpop($key);
             if (!empty($json)){
-                $client($json);
+                try{
+                    $client($json);
+                }catch (\Exception $e){
+                    $this->error($e->getMessage());
+                }
+                
                 $array = json_decode($json, true);
                 if(is_array($array)) {
                     foreach ($array as $item){
