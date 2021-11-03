@@ -6,6 +6,7 @@ use alibaba\nacos\Nacos;
 use alibaba\nacos\NacosConfig;
 use App\Bootstrap\LoadNacosVariables;
 use Illuminate\Console\Command;
+use Illuminate\Foundation\Bootstrap\LoadConfiguration;
 use Illuminate\Support\Facades\App;
 
 class NacosRefresh extends Command
@@ -58,5 +59,7 @@ class NacosRefresh extends Command
 
         // 重新加载环境变量
         (new LoadNacosVariables())->bootstrap(App());
+        // 重新加载配置
+        (new LoadConfiguration())->bootstrap(App());
     }
 }
