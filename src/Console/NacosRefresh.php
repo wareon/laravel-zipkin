@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Console\Commands;
+namespace Wareon\Zipkin\Console;
 
 use alibaba\nacos\Nacos;
 use alibaba\nacos\NacosConfig;

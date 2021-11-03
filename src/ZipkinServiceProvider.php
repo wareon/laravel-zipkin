@@ -47,6 +47,7 @@ class ZipkinServiceProvider extends ServiceProvider
             $this->commands([
                 Console\ConsumeZipkinLog::class,
                 Console\RpcServerStart::class,
+                Console\NacosRefresh::class
             ]);
         }
     }
