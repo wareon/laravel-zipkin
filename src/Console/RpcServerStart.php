@@ -54,10 +54,10 @@ class RpcServerStart extends Command
 
     public function getService()
     {
+        $this->callSilent('nacos:refresh');
+
         try {
-
-            $this->callSilent('nacos:refresh');
-
+            
             $name = config('zipkin.rpc_name', 'Laravel zipkin RPC');
             $processorClass = config('zipkin.processor_class');
             $serviceClass = config('zipkin.service_class');
