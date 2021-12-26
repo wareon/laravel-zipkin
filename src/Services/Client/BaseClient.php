@@ -42,8 +42,14 @@ class BaseClient
             $transport->open();
 
             if ($arguments) {
+                $extArguments = config('ext_arguments');
                 foreach ($arguments as $k => $v) {
                     if (is_array($v)) {
+                        if(is_array($extArguments)) {
+                            foreach ($extArguments as $extKey => $extVal) {
+                                if(!empty($extVal)) $v[$extKey] = $extVal;
+                            }
+                        }
                         $arguments[$k] = json_encode($v, JSON_UNESCAPED_UNICODE);
                     }
                 }
