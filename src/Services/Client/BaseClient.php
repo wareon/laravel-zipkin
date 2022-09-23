@@ -93,13 +93,8 @@ class BaseClient
 
             if($response['code'] == 100001){
                 $data = $response['data'] ?? [];
-                $message = data_get($data, "*.*");
-                if($message) {
-                    if(count($message) == count($message, 1)){// 一维数组
-                        $message = join(",", $message);
-                    } else {// 二维数组
-                        $message = $data;
-                    }
+                if($data) {
+                    $message = $data;
                 } else {
                     $message = $response['message'];
                 }
