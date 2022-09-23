@@ -92,12 +92,17 @@ class BaseClient
         } else {
 
             if($response['code'] == 100001){
-
-                $message = data_get($response['data'], "*.*");
-                if($message)
-                    $message = join(",", $message);
-                else
+                $data = $response['data'] ?? [];
+                $message = data_get($data, "*.*");
+                if($message) {
+                    if(count($message) == count($message, 1)){// 一维数组
+                        $message = join(",", $message);
+                    } else {// 二维数组
+                        $message = $data;
+                    }
+                } else {
                     $message = $response['message'];
+                }
 
                 return [$response['code'], $message ?? [], $response];
             }else{
